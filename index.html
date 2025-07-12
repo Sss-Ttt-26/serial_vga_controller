@@ -1,0 +1,200 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>Proiect 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f6f8f4;
+        }
+        .container0{
+width: 80%;
+text-align: center;
+margin: auto;
+overflow: hidden;
+        }
+.container1{
+margin: auto;
+overflow: hidden;
+width: 80%;
+padding: 20px;
+background-color: #fff;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+border-radius: 5px;
+text-align: auto;
+}
+        header 
+	{
+            background: #223333;
+            color: #ffffff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #00aa11 3px solid;
+        }
+        header a {
+            color: #ffffff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+
+        }
+        header li {
+            float: center;
+            display: inline;
+
+            padding: 0 20px 0 20px;
+        }
+        header #branding {
+            float: left;
+        }
+        header #branding h1 {
+            margin: 0;
+        }
+        .side-col a {
+            color: #1e90ff;
+        }
+        footer {
+            background: #223333;
+            color: #ffffff;
+            text-align: center;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        .image-row {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .image-row img {
+            width: 45%;
+            max-width: 100%;
+            height: auto;
+        }
+nav a {
+display: inline-block;
+padding: 10px 20px;
+text-decoration: none;
+color: #ffffff;
+transition: background-color 0.3s;
+border-radius: 5px;
+font-size: 18px;
+}
+
+nav a:hover,
+nav li.active a {
+background-color: #35424a;
+}
+
+nav a:active {
+background-color: #35424a;
+}
+</style>
+</head>
+<body>
+<header>
+<div class="container0">
+<div id="branding">
+<h1>Afişare de mesaje primite pe serială pe monitor VGA</h1>
+<nav>
+<ul>
+<li class="active"><a href="index.html">Acasă</a></li>
+<li><a href="functionare.html">Lista de intrucțiuni acceptate</a></li>
+<li><a href="bibliografie.html">Bibliografie</a></li>
+</ul>
+</nav>
+</div>
+</div>
+</header>
+
+<section class="container1">
+<div class="main-col">
+<h2>Introducere</h2>
+<p>Acest proiect implică crearea unui terminal cu intrare uart &#351i ie&#351ire la un monitor cu intrare VGA.
+Acesta afi&#351eaz&#259 mesajele primite pe interfa UART pe o rezolu&#355ie de 4x5 caractere. Se folose&#351te microcontrolerlul ATmega164A, 3 DAC-uri simple &#351i 
+un set de proti logice nxor &#351i xor pentru formarea semanlului video in formatul corspunz&#259tor.</p>
+<h2>Componente Folosite:</h2>
+<ul><li>Microcontroler ATmega164A</li><li>4025 (3 por&#355i de tip nor)</li>
+<li>4070 (4 por&#355i de tip nxor)</li>
+<li>Tranzistor NPN bc337</li>
+<li>Rezistoare</li>
+</ul>
+
+<h2>Implementare</h2>
+
+<h3>Explicție teoretică</h3>
+
+<p>Prin VGA semnalul video este transmis in felul următor: Intensitățile fiecăreia componente a unui
+pixel (roșu, verde și albastru) sunt transmise separat, în format analogic, sub formă de tensiune intre 0,3V și 0,7V.
+Pe componenta verde mai este prezent și semnalul de sincronizare pe orizontală și pe verticală, fiind compus prin operația xor a impulsul de
+sincronizare pe orizontală și cel pe verticală, având tensiunile 0 sau 0,3V (deci nu posibil de transmis un semnal video în perioada de intervalul de sincronizare), probabil pentru a putea fi
+transmis cu ușurință și pe unele standarte a televizoarilor.</p>
+<img src="./img/vga_frame.png" alt="Schema Bloc" style="width:30%;">
+<p>
+Impulusrile de sincronizare pe orizontală trebuie generate constant cu un interval 
+exact, astfel monitorul să știe când să treacă într-o linie nouă, iar cel pe verticală este generat la un număr anumit de linii și durează o perioadă
+echivalentă cu câteva linii, în dependență de rezoluție, și care determină frecvența de actualizare a cadrelor. 
+Aceaste intervale cu lungimile anumite erau necesare pentru monitoarele de tip CRT (cu tub), unde poziția fasciculul de electroni avea ne voie de un anumit timp 
+pentru ca aceasta să ajunga de la stânga la dreapa ecranului sau în colțul opus (când se actualiza cadrul). În principiu sunt foarte multe standarte de timpuri
+pentru diferite combinații de rezoluții și frecvențe de actualizare, multe din acestea ne fiind suportate de monitoarele mai noi</p>
+
+<h3>Alegerea configuraţiei</h3>
+<p>Pentru acest proiect am ales rezoluția de 800*600 la frecvența de 60 Hz, fiind o setare des întâlnită și care poate fi ușor implementată, deoarece ceasul
+de 20 MHz poate fi împărțit pentru a creea perioadele necesare pentru semna. Pentru a transmite semanlul video se va folosi DAC-uri rezistive ponderate pe 2 biți
+pentru componentele roșu și albastru și un DAC de acest tip, însă pe 3 biți pentru componenta verde, unde oricum se vor folosi 2 biți pentru generarea intensității 
+culorii și al 3-lea pentru generarea semnalelor de sincronizare între 0 și 0.3V. Se folosec doar 5 din cele 8 valori, iar pentru a sigura absența unei informații video
+în perioada când la ieșire se așteaptă 0 V, se folosește poarta NOR (a fost aleasă varianta cu 3 intrări doar deoarece doar acel model a fost disponibil la momentul
+procurării). Un tranzistor se folose&#351te pentru a amplifica &#238n curent semnalul generat de poarta logic&#259, din cauza rezisten&#355ei de ie&#351ire mare a ei.
+</p>
+
+<h3>Schema Bloc</h3>
+<img src="./img/Schema.bmp" alt="Schema Bloc" style="width:100%;">
+<p>Mai sus este schema bloc a sistemului f&#259r&#259 conexiunile de alimentare, butoane &#351i led. S&#259ge&#355ile arat&#259 ie&#351irea unui pin concret (num&#259rul din paranteze arat&#259 ordinea) pe mufa VGA.</p>
+<p><a href = "http://ham.elcom.pub.ro/proiect2/files/cpu-rev9.pdf">Aici e schema cu schema electrica a placutei cu butoane, alimantare si interfata de iesire</a></p>
+<h3>Implementare Software</h3>
+<p>Software-ul pentru acest proiect este scris în C folosind IDE-ul CodeVisionAVR.</p>
+
+<h3>Scurt&#259 descriere a codului</h3>
+<p>Codul const&#259 dintr-o bucl&#259 infinit&#259 &#238n care se cite&#351te un caracter &#238n codul ASCII sau o secven&#355 de date pentu o ac&#355iune 
+<a href = "functionare.html">(precum schimbarea culorii sau cur&#259&#355irea ecranului, lista &#351i formatul pot fi v&#259zute aici)</a> modific&#226nd memoria video (de 24*30 = 720 pixeli).</p>
+<p>Imaginea este afișată printr-o intrerupere ce are loc la fiecare 26,4 us (comform rezoluției 800*600, 60 Hz). Aceasta generează impulsul de sinconizare pe orizontală, după care, dacă
+linia afișată este in zonă vizibilă, atunci modifică valoarea portului B comform culorii salvate in memorie a celor 24 de pixeli pe adresa liniei virtuale curente sau, dacă linia depășește 600, se generează impulsul de sincronizare pe verticală.
+Se folosește o variabila care păstrează numărul liniei curente care se incrementează la fiecare chemare a intreruperii și se resetează când se ajunge la prima linie din zona vizibilă a ecranului.
+O altă variabilă se folosește pentru a monitoriza numarul liniei virtuale, care se incrementeaza odată la 32 de linii reale.
+
+<h3>Diagrama cod</h3>
+<img src="./img/Diagrama1.bmp" alt="Schema Bloc" style="width:70%;">
+
+<h3>Diagrama intrerupere</h3>
+<img src="./img/Diagrama2.bmp" alt="Schema Bloc" style="width:70%;">
+
+<h3>Imagini și Videoclipuri</h3>
+<p>Aici sunt imagini cu plăcuța cât și imagini cu mesaje afișate pe ecran</p>
+<img src="./img/Foto1.jpeg" alt="Schema Bloc" style="width:80%;">
+<p></p>
+<img src="./img/Foto2.jpeg" alt="Schema Bloc" style="width:80%;">
+<p></p>
+<img src="./img/Foto3.jpeg" alt="Schema Bloc" style="width:80%;">
+<p></p>
+<p>Acest video arată funcționarea acestui dispozitiv</p>
+<video controls="">
+<source src="./img/video.mp4" type="video/mp4">               
+</video>
+<h3>Concluzii:</h3>
+<p>Proiectul a fost realizat cu succes. În urma proiectului am studiat interfața VGA și metode de optimizare a codului. </p>
+</p>Caractreristicele au fost limitate de memoria RAM limitată, viteza de ceas relativ mică a microcontrolerului și de faptul că nu se putea folosi semnal de ceas nu putea fi folosit
+la alte circuite externe ce ar elibera microprocesorul de execuția a mai multor funcții. </p>
+<p>Totuși se pot implementa mai multe funcții interesante, cum ar fi un joc X și 0, controlat prin UART</p>
+</section>
+<footer>Nume : Vaculovschi &#350tefan-Tudor,  Mosteanu Alina-Mihaela    Grupa: 433E</footer>
+
+
+</body>
+</html>
